@@ -1,0 +1,328 @@
+﻿Program.Sub.ScreenSU.Start
+Gui.frmSubParts..Create(DashForm)
+Gui.frmSubParts..Caption("Job Sub Part Tracking")
+Gui.frmSubParts..Size(18690,7665)
+Gui.frmSubParts..MinX(0)
+Gui.frmSubParts..MinY(0)
+Gui.frmSubParts..Position(0,0)
+Gui.frmSubParts..AlwaysOnTop(False)
+Gui.frmSubParts..FontName("Tahoma")
+Gui.frmSubParts..FontSize(8.25)
+Gui.frmSubParts..ControlBox(True)
+Gui.frmSubParts..MaxButton(True)
+Gui.frmSubParts..MinButton(True)
+Gui.frmSubParts..MousePointer(0)
+Gui.frmSubParts..Moveable(True)
+Gui.frmSubParts..Sizeable(True)
+Gui.frmSubParts..ShowInTaskBar(True)
+Gui.frmSubParts..TitleBar(True)
+Gui.frmSubParts..BarSaveButton(True,False)
+Gui.frmSubParts..Event(UnLoad,frmSubParts_UnLoad)
+Gui.frmSubParts..Event(SaveButtonClick,frmSubParts_SaveButtonClick)
+Gui.frmSubParts..Event(UserButtonClicked,frmSubParts_UserButtonClicked)
+Gui.frmSubParts.gsgcParts.Create(GsGridControl)
+Gui.frmSubParts.gsgcParts.Enabled(True)
+Gui.frmSubParts.gsgcParts.Visible(True)
+Gui.frmSubParts.gsgcParts.Zorder(0)
+Gui.frmSubParts.gsgcParts.Size(18690,6675)
+Gui.frmSubParts.gsgcParts.Position(0,0)
+Gui.frmSubParts.gsgcParts.Dock(5)
+Gui.frmSubParts.txtLoseFocus.Create(TextBox,"",True,1500,300,0,765,7440,True,0,"Tahoma",8.25,,1)
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+v.Global.sWCCol.Declare
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+F.Intrinsic.Control.Try
+	'Hook  15881
+	F.ODBC.Connection!Con6196.opencompanyconnection(90)
+	gui.frmSubParts..BarAddButton("SelectAll","Select All")
+	gui.frmSubParts..BarAddButton("DeselectAll","Deselect All")
+	
+	'Set Title
+	v.Local.sTitle.Declare
+	f.Intrinsic.String.Concat("WO ",v.Passed.000004,V.Local.sTitle)
+	GUI.frmSubParts..Caption(v.local.sTitle)
+	
+	'Create record in table if it does not exist
+	f.Intrinsic.Control.CallSub(createRecord)
+
+	'Format Grid
+	f.Intrinsic.Control.CallSub(preFormat)
+	
+	gui.frmSubParts..Show
+	
+F.Intrinsic.Control.Catch
+	f.Intrinsic.UI.Msgbox(v.Ambient.ErrorDescription)
+F.Intrinsic.Control.EndTry
+Program.Sub.Main.End
+
+Program.Sub.PreFormat.Start
+f.Intrinsic.Control.Try
+	v.Local.sJob.Declare
+	v.Local.sSuf.Declare
+	v.Local.sWOS.Declare
+	v.Local.sSql.Declare
+	v.Local.sWC.Declare
+	v.Local.sCap.Declare
+	v.Local.sLab.Declare
+	v.Local.sWCCol.Declare
+	v.Local.sLabCol.Declare
+	v.Local.i.Declare
+	v.Local.iCol.Declare
+	
+	V.Local.sWC.Set(v.Passed.009000)
+	v.Local.sWOS.Set(v.Passed.000004)
+	f.Intrinsic.String.split(v.Local.sWOS,"-",v.Local.sWOS)
+	v.Local.sJob.Set(v.Local.sWOS(0))
+	v.local.sSuf.Set(v.Local.sWOS(1))
+	
+	'Create the master table
+	f.Intrinsic.String.Build("SELECT * FROM GAB_6196_MULTI_PART_TRACK WHERE JOB='{0}' AND SUFFIX='{1}'",V.Local.sJob,v.Local.sSuf,v.Local.sSql)
+	f.Data.DataTable.CreateFromSQL("dtMast","con6196",v.Local.sSql,true)
+	gui.frmSubParts.gsgcParts.DataSource("dtMast")
+	gui.frmSubParts.gsgcParts.AddGridviewFromDatatable("gv","dtMast")
+	
+	'Set the header caption
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_1","Caption",v.DataTable.dtMast(0).LABOUR_1_WC!FIELDVALTRIM)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_2","Caption",v.DataTable.dtMast(0).LABOUR_2_WC!FIELDVALTRIM)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_3","Caption",v.DataTable.dtMast(0).LABOUR_3_WC!FIELDVALTRIM)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_4","Caption",v.DataTable.dtMast(0).LABOUR_4_WC!FIELDVALTRIM)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_5","Caption",v.DataTable.dtMast(0).LABOUR_5_WC!FIELDVALTRIM)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_6","Caption",v.DataTable.dtMast(0).LABOUR_6_WC!FIELDVALTRIM)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_7","Caption",v.DataTable.dtMast(0).LABOUR_7_WC!FIELDVALTRIM)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_8","Caption",v.DataTable.dtMast(0).LABOUR_8_WC!FIELDVALTRIM)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_9","Caption",v.DataTable.dtMast(0).LABOUR_9_WC!FIELDVALTRIM)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_10","Caption",v.DataTable.dtMast(0).LABOUR_10_WC!FIELDVALTRIM)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_11","Caption",v.DataTable.dtMast(0).LABOUR_11_WC!FIELDVALTRIM)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_12","Caption",v.DataTable.dtMast(0).LABOUR_12_WC!FIELDVALTRIM)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_13","Caption",v.DataTable.dtMast(0).LABOUR_13_WC!FIELDVALTRIM)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_14","Caption",v.DataTable.dtMast(0).LABOUR_14_WC!FIELDVALTRIM)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_15","Caption",v.DataTable.dtMast(0).LABOUR_15_WC!FIELDVALTRIM)
+	
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_1","ReadOnly",false)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_2","ReadOnly",false)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_3","ReadOnly",false)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_4","ReadOnly",false)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_5","ReadOnly",false)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_6","ReadOnly",false)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_7","ReadOnly",false)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_8","ReadOnly",false)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_9","ReadOnly",false)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_10","ReadOnly",false)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_11","ReadOnly",false)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_12","ReadOnly",false)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_13","ReadOnly",false)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_14","ReadOnly",false)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_15","ReadOnly",false)
+	
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_1","AllowEdit",true)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_2","AllowEdit",true)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_3","AllowEdit",true)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_4","AllowEdit",true)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_5","AllowEdit",true)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_6","AllowEdit",true)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_7","AllowEdit",true)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_8","AllowEdit",true)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_9","AllowEdit",true)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_10","AllowEdit",true)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_11","AllowEdit",true)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_12","AllowEdit",true)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_13","AllowEdit",true)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_14","AllowEdit",true)
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","LABOUR_15","AllowEdit",true)
+	
+	'Find the column that is this WC
+	f.Intrinsic.Control.For(v.Local.i,0,v.DataTable.dtMast.RowCount--,1)
+		f.Intrinsic.Control.If(v.local.sWC,=,v.DataTable.dtMast(v.Local.i).LABOUR_1_WC!Fieldvaltrim)
+			v.Local.iCol.Set(1)
+		f.Intrinsic.Control.ElseIf(v.Local.sWC,=,v.DataTable.dtMast(v.Local.i).LABOUR_2_WC!Fieldvaltrim)
+			v.Local.iCol.Set(2)
+		f.Intrinsic.Control.ElseIf(v.Local.sWC,=,v.DataTable.dtMast(v.Local.i).LABOUR_3_WC!Fieldvaltrim)
+			v.Local.iCol.Set(3)
+		f.Intrinsic.Control.ElseIf(v.Local.sWC,=,v.DataTable.dtMast(v.Local.i).LABOUR_4_WC!Fieldvaltrim)
+			v.Local.iCol.Set(4)
+		f.Intrinsic.Control.ElseIf(v.Local.sWC,=,v.DataTable.dtMast(v.Local.i).LABOUR_5_WC!Fieldvaltrim)
+			v.Local.iCol.Set(5)
+		f.Intrinsic.Control.ElseIf(v.Local.sWC,=,v.DataTable.dtMast(v.Local.i).LABOUR_6_WC!Fieldvaltrim)
+			v.Local.iCol.Set(6)
+		f.Intrinsic.Control.ElseIf(v.Local.sWC,=,v.DataTable.dtMast(v.Local.i).LABOUR_7_WC!Fieldvaltrim)
+			v.Local.iCol.Set(7)
+		f.Intrinsic.Control.ElseIf(v.Local.sWC,=,v.DataTable.dtMast(v.Local.i).LABOUR_8_WC!Fieldvaltrim)
+			v.Local.iCol.Set(8)
+		f.Intrinsic.Control.ElseIf(v.Local.sWC,=,v.DataTable.dtMast(v.Local.i).LABOUR_9_WC!Fieldvaltrim)
+			v.Local.iCol.Set(9)
+		f.Intrinsic.Control.ElseIf(v.Local.sWC,=,v.DataTable.dtMast(v.Local.i).LABOUR_10_WC!Fieldvaltrim)
+			v.Local.iCol.Set(10)
+		f.Intrinsic.Control.ElseIf(v.Local.sWC,=,v.DataTable.dtMast(v.Local.i).LABOUR_11_WC!Fieldvaltrim)
+			v.Local.iCol.Set(11)
+		f.Intrinsic.Control.ElseIf(v.Local.sWC,=,v.DataTable.dtMast(v.Local.i).LABOUR_12_WC!Fieldvaltrim)
+			v.Local.iCol.Set(12)
+		f.Intrinsic.Control.ElseIf(v.Local.sWC,=,v.DataTable.dtMast(v.Local.i).LABOUR_13_WC!Fieldvaltrim)
+			v.Local.iCol.Set(13)
+		f.Intrinsic.Control.ElseIf(v.Local.sWC,=,v.DataTable.dtMast(v.Local.i).LABOUR_14_WC!Fieldvaltrim)
+			v.Local.iCol.Set(14)
+		f.Intrinsic.Control.ElseIf(v.Local.sWC,=,v.DataTable.dtMast(v.Local.i).LABOUR_15_WC!Fieldvaltrim)
+			v.Local.iCol.Set(15)
+		f.Intrinsic.Control.EndIf
+	f.Intrinsic.Control.Next(v.Local.i)
+	
+	'Hide all other columns
+	f.Intrinsic.Control.For(v.Local.i,1,15,1)
+		f.Intrinsic.Control.If(v.Local.i,<>,v.Local.iCol)
+			f.Intrinsic.String.Concat("LABOUR_",v.Local.i,v.Local.sLabCol)
+			f.Intrinsic.String.Concat("LABOUR_",v.Local.i,"_WC",v.Local.sWCCol)
+			gui.frmSubParts.gsgcParts.SetColumnProperty("gv",v.Local.sLabCol,"Visible","False")
+			gui.frmSubParts.gsgcParts.SetColumnProperty("gv",v.Local.sWCCol,"Visible","False")
+		f.Intrinsic.Control.else
+			f.Intrinsic.String.Concat("LABOUR_",v.Local.i,"_WC",v.Local.sWCCol)
+			gui.frmSubParts.gsgcParts.SetColumnProperty("gv",v.Local.sWCCol,"Visible","False")
+			f.Intrinsic.String.Concat("LABOUR_",v.Local.i,v.Global.sWCCol)
+			
+		f.Intrinsic.Control.EndIf
+	f.Intrinsic.Control.Next(v.Local.i)
+	
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","ID","Visible","False")
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","Job","Visible","False")
+	gui.frmSubParts.gsgcParts.SetColumnProperty("gv","Suffix","Visible","False")
+	
+f.Intrinsic.Control.Catch
+	f.Intrinsic.UI.Msgbox(v.Ambient.ErrorDescription)
+	f.Intrinsic.Control.CallSub(frmSubParts_UnLoad)
+f.Intrinsic.Control.EndTry
+Program.Sub.PreFormat.End
+
+Program.Sub.createRecord.Start
+f.Intrinsic.Control.Try
+	v.Local.sWC.Declare
+	V.Local.sSql.Declare
+	v.Local.sSql2.Declare
+	v.Local.sSeq.Declare
+	v.Local.sWOS.Declare
+	v.Local.sJob.Declare
+	v.Local.sSuf.Declare
+	v.Local.sFGPart.Declare
+	v.Local.sSubPart.Declare
+	v.Local.sDesc.Declare
+	v.Local.sEmpID.Declare
+	v.Local.sEmpName.Declare
+	v.Local.sWCStr.Declare
+	v.Local.i.Declare
+	v.Local.i2.Declare
+	v.Local.iPlusOne.Declare
+	v.Local..BulkDeclareString(sWC1,sWC2,sWC3,sWC4,sWC5,sWC6,sWC7,sWC8,sWC9,sWC10,sWC11,sWC12,sWC13,sWC14,sWC15)
+	v.Local..BulkDeclareLong(iLab1,iLab2,iLab3,iLab4,iLab5,iLab6,iLab7,iLab8,iLab9,iLab10,iLab11,iLab12,iLab13,iLab14,iLab15)
+	
+	V.Local.sWC.Set(v.Passed.009000)
+	v.Local.sFGPart.Set(v.Passed.009002)
+	V.Local.sEmpID.Set(V.Passed.009993)
+	V.Local.sEmpName.Set(v.passed.009994)
+	v.Local.sSeq.Set(v.Passed.000005)
+	v.Local.sWOS.Set(v.Passed.000004)
+	f.Intrinsic.String.split(v.Local.sWOS,"-",v.Local.sWOS)
+	v.Local.sJob.Set(v.Local.sWOS(0))
+	v.local.sSuf.Set(v.Local.sWOS(1))
+	
+	'Select the multiparts from job and determine if the track record is setup
+	f.Intrinsic.String.Build("SELECT * FROM JOB_MULT_PARTS WHERE JOB='{0}' AND SUFFIX='{1}'",v.Local.sJob,v.local.sSuf,v.local.sSql)
+	f.Data.DataTable.CreateFromSQL("dtMulti","con6196",v.Local.sSql,true)
+	f.Intrinsic.Control.If(v.DataTable.dtMulti.RowCount,<>,0)
+		f.Intrinsic.Control.for(v.Local.i2,0,v.DataTable.dtMulti.RowCount--,1)
+			v.Local.sSubPart.Set(v.DataTable.dtMulti(v.Local.i2).PART!FIELDVALTRIM)
+			v.Local.sDesc.set(v.DataTable.dtMulti(v.Local.i2).DESCR!FIELDVALTRIM)
+			
+			'See if the master record exist
+			F.Intrinsic.Control.If(V.DataTable.dt6169t.Exists)
+				F.Data.DataTable.Close("dt6169t")
+			F.Intrinsic.Control.EndIf
+			f.Intrinsic.String.Build("SELECT * FROM GAB_6196_MULTI_PART_TRACK WHERE JOB='{0}' AND SUFFIX='{1}' AND PART='{2}'",v.Local.sJob,v.local.sSuf,v.Local.sSubPart,v.local.sSql)
+			f.Data.DataTable.CreateFromSQL("dt6169t","con6196",v.Local.sSql,true)
+			
+			'The master track record does not exist, must add in.
+			f.Intrinsic.Control.If(v.DataTable.dt6169t.RowCount,=,0)
+				'Insert into the master tracking table
+				f.Intrinsic.String.Concat("INSERT INTO GAB_6196_MULTI_PART_TRACK ( PART , DESCRIPTION , LABOUR_1 , LABOUR_2 , LABOUR_3 , LABOUR_4 , LABOUR_5 , LABOUR_6 , LABOUR_7 , LABOUR_8 , LABOUR_9 , LABOUR_10 , LABOUR_11 , LABOUR_12 , LABOUR_13 , LABOUR_14 , LABOUR_15 , LABOUR_1_WC , LABOUR_2_WC , LABOUR_3_WC , LABOUR_4_WC , LABOUR_5_WC , LABOUR_6_WC , LABOUR_7_WC , LABOUR_8_WC , LABOUR_9_WC , LABOUR_10_WC , LABOUR_11_WC , LABOUR_12_WC , LABOUR_13_WC , LABOUR_14_WC , LABOUR_15_WC , JOB , SUFFIX ) ","",v.Local.sSql)
+				f.Intrinsic.String.Concat(v.Local.sSql," VALUES ('{0}','{1}',{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},'{17}','{18}','{19}','{20}','{21}','{22}','{23}','{24}','{25}','{26}','{27}','{28}','{29}','{30}','{31}','{32}','{33}')",v.Local.ssql)
+				
+				'Find the labour steps from the routing
+				f.Intrinsic.Control.If(v.DataTable.dtJobSteps.Exists)
+					f.Data.DataTable.Close("dtJobSteps")
+				f.Intrinsic.Control.EndIf
+				f.Intrinsic.String.Build("select * from JOB_OPERATIONS WHERE JOB='{0}' AND SUFFIX='{1}' AND LMO='L' order by SEQ",v.Local.sJob,v.local.sSuf,v.local.sSql2)
+				F.Data.DataTable.CreateFromSQL("dtJobSteps","con6196",v.Local.sSql2,true)
+				f.Intrinsic.Control.For(v.local.i,0,v.DataTable.dtJobSteps.RowCount--,1)
+					f.Intrinsic.Math.Add(v.Local.iPlusOne,1,v.Local.iPlusOne)
+					f.Intrinsic.String.Concat("sWC",v.Local.iPlusOne,v.Local.sWCStr)
+					v.Local.[v.Local.sWCStr].Set(v.DataTable.dtJobSteps(v.Local.i).Part!Fieldvaltrim)
+				f.Intrinsic.Control.Next(v.Local.i)
+				v.Local.iPlusOne.Set(0)
+				
+				'Insert the data query
+				f.Intrinsic.String.Build(v.local.sSql,v.Local.sSubPart,v.Local.sDesc,v.local.iLab1,v.Local.iLab2,v.local.iLab3,v.Local.iLab4,v.local.iLab5,v.Local.iLab6,v.local.iLab7,v.Local.iLab8,v.local.iLab9,v.Local.iLab10,v.local.iLab11,v.Local.iLab12,v.local.iLab13,v.Local.iLab14,v.local.iLab15,v.Local.sWC1,v.local.sWC2,v.Local.sWC3,v.local.sWC4,v.Local.sWC5,v.Local.sWC6,v.Local.sWC7,v.Local.sWC8,v.Local.sWC9,v.Local.sWC10,v.Local.sWC11,v.Local.sWC12,v.Local.sWC13,v.Local.sWC14,v.Local.sWC15,v.Local.sJob,v.Local.sSuf,v.Local.sSql)
+				f.ODBC.Connection!con6196.Execute(v.Local.ssql)
+			f.Intrinsic.Control.EndIf
+		f.Intrinsic.Control.Next(v.Local.i2)
+	f.Intrinsic.Control.EndIf
+F.Intrinsic.Control.Catch
+	f.Intrinsic.UI.Msgbox(v.Ambient.ErrorDescription)
+	f.Intrinsic.Control.CallSub(frmSubParts_UnLoad)
+F.Intrinsic.Control.EndTry
+Program.Sub.createRecord.End
+
+Program.Sub.frmSubParts_UnLoad.Start
+f.ODBC.Connection!con6196.Close
+f.Intrinsic.Control.end
+Program.Sub.frmSubParts_UnLoad.End
+
+Program.Sub.frmSubParts_SaveButtonClick.Start
+f.Intrinsic.Control.Try
+	gui.frmSubParts.txtLoseFocus.SetFocus(1)
+	f.Data.DataTable.SaveToDB("dtMast","con6196","GAB_6196_MULTI_PART_TRACK","ID",7)
+	f.Intrinsic.Control.CallSub(frmSubParts_UnLoad)
+f.Intrinsic.Control.Catch
+	f.Intrinsic.UI.Msgbox(v.Ambient.ErrorDescription)
+	f.Intrinsic.Control.CallSub(frmSubParts_UnLoad)
+f.Intrinsic.Control.EndTry
+Program.Sub.frmSubParts_SaveButtonClick.End
+
+Program.Sub.frmSubParts_UndoButtonClick.Start
+f.Intrinsic.Control.Try
+	v.Local.i.Declare
+	f.Intrinsic.Control.For(v.Local.i,0,v.DataTable.dtMast.RowCount--)
+		f.Data.DataTable.SetValue("dtMast",v.Local.i,v.global.sWCCol,"True")
+	f.Intrinsic.Control.Next(v.Local.i)
+	gui.frmSubParts.txtLoseFocus.SetFocus(1)
+f.Intrinsic.Control.Catch
+	f.Intrinsic.UI.Msgbox(v.Ambient.ErrorDescription)
+	f.Intrinsic.Control.CallSub(frmSubParts_UnLoad)
+f.Intrinsic.Control.EndTry
+Program.Sub.frmSubParts_UndoButtonClick.End
+
+Program.Sub.frmSubParts_UserButtonClicked.Start
+f.Intrinsic.Control.Try
+	v.Local.i.Declare
+	f.Intrinsic.Control.SelectCase(v.Args.Button)
+		f.Intrinsic.Control.Case("SelectAll")
+			f.Intrinsic.Control.For(v.Local.i,0,v.DataTable.dtMast.RowCount--)
+				f.Data.DataTable.SetValue("dtMast",v.Local.i,v.global.sWCCol,"True")
+			f.Intrinsic.Control.Next(v.Local.i)
+		f.Intrinsic.Control.Case("DeselectAll")
+			f.Intrinsic.Control.For(v.Local.i,0,v.DataTable.dtMast.RowCount--)
+				f.Data.DataTable.SetValue("dtMast",v.Local.i,v.global.sWCCol,"False")
+			f.Intrinsic.Control.Next(v.Local.i)
+	f.Intrinsic.Control.EndSelect
+	
+	gui.frmSubParts.txtLoseFocus.SetFocus(1)
+f.Intrinsic.Control.Catch
+	f.Intrinsic.UI.Msgbox(v.Ambient.ErrorDescription)
+	f.Intrinsic.Control.CallSub(frmSubParts_UnLoad)
+
+f.Intrinsic.Control.EndTry
+Program.Sub.frmSubParts_UserButtonClicked.End
+
+Program.Sub.Comments.Start
+${$5$}$3.0.0.0$}$1
+${$6$}$KRoberts$}$20201202115615081$}$SCyhQZic3V3oKWb0oKsKHRmmG0BIwjdooYy3ktoPyOuEsyrx+rA30Qc8gWOYAuaSvPM3HuVCeQR9vUV1qaOA9A==
+Program.Sub.Comments.End
